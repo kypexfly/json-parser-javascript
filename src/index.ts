@@ -5,7 +5,16 @@ export function parseJSON(str: string) {
 
   function parseValue() {
     skipWhiteSpace();
-    const value = parseNumber() ?? parseString() ?? parseObject() ?? parseArray();
+
+    const value =
+      parseString() ??
+      parseNumber() ??
+      parseObject() ??
+      parseArray() ??
+      parseKeyword("true", true) ??
+      parseKeyword("false", false) ??
+      parseKeyword("null", null);
+
     skipWhiteSpace();
     return value;
   }
@@ -92,7 +101,7 @@ export function parseJSON(str: string) {
 
   function parseNumber() {
     let start = index;
-    skipWhiteSpace();
+
     // Negative
     if (str[index] === "-") {
       index++;
@@ -132,6 +141,13 @@ export function parseJSON(str: string) {
     }
   }
 
+  function parseKeyword(name: string, value: unknown): any {
+    if (str.slice(index, index + name.length) === name) {
+      index += name.length;
+      return value;
+    }
+  }
+
   function skipWhiteSpace() {
     while (
       str[index] === " " ||
@@ -157,12 +173,3 @@ export function parseJSON(str: string) {
     index++;
   }
 }
-
-const result1 = parseJSON('"foobar"');
-const result2 = parseJSON('{ "foo": "bar" }');
-const result3 = parseJSON('["a", "b", "c"]');
-const result4 = parseJSON("[1, 2, 3, 4, 5]");
-console.log("parse strings: ", result1);
-console.log("parse objects: ", result2);
-console.log("parse arrays of strings: ", result3);
-console.log("parse arrays of numbers: ", result4);
